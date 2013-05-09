@@ -62,6 +62,7 @@ def detect_namespace(config_file, default_namespace, namespace_separator):
 	if default_namespace is not None:
 		paths[0] = default_namespace
 	
+	paths = [path.decode('utf-8') for path in paths]
 	namespace = namespace_separator.join(paths)
 	
 	return namespace
@@ -134,8 +135,12 @@ def phpmake_new(args):
 		contents = contents.replace("namespace __namespace__;\n\n", "")
 
 	for key, value in variables.items():
+		if isinstance(value, str):
+			value = value.decode('utf-8')
 		contents = contents.replace(key, value)
 	
+	filename = filename.decode('utf-8')
+	contents = contents.encode('utf-8')
 	file = open(filename + '.php', 'w')
 	file.write(contents)
 	file.close()
