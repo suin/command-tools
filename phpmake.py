@@ -6,6 +6,7 @@ import os
 from glob import glob
 import re
 import json
+from unicodedata import normalize
 
 USER_DIR = os.environ["HOME"] + '/.phpmake-master'
 
@@ -56,13 +57,15 @@ def get_skelton_file(filename):
 
 def detect_namespace(config_file, default_namespace, namespace_separator):
 	current_dir = os.popen("pwd").read().rstrip() # Call command becouse os.getcwd() is not case sensitive on MacOSX
+	current_dir = os.path.realpath(current_dir)
+
 	base_dir = len(os.path.dirname(os.path.dirname(config_file)))
 	paths = current_dir[base_dir+1:].split(os.sep)
 
 	if default_namespace is not None:
 		paths[0] = default_namespace
 	
-	paths = [path.decode('utf-8') for path in paths]
+	paths = [filename_decode(path) for path in paths]
 	namespace = namespace_separator.join(paths)
 	
 	return namespace
@@ -146,6 +149,9 @@ def phpmake_new(args):
 	file.close()
 	
 	print "Script created: %s.php" % filename
+
+def filename_decode(str):
+	return normalize('NFC', str.decode('utf-8'))
 
 def main():
 	parser = argparse.ArgumentParser(description="PHP template file maker")
